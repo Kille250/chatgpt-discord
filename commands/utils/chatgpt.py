@@ -19,7 +19,7 @@ class Chatgpt(commands.Cog):
 
     @commands.command(name="conv")
     @commands.cooldown(1, 5, commands.BucketType.guild)
-    async def conv(self, ctx: commands.Context, arg1, arg2=None):
+    async def conv(self, ctx: commands.Context, arg1):
         user = self.database.conv_get(
             user_id=ctx.author.id
         )
@@ -33,12 +33,9 @@ class Chatgpt(commands.Cog):
 
         if arg1 not in allowed_params:
             await ctx.send(
-                "Please type start or close for the first parameter."
+                "Please type start or close as a parameter"
                 )
             return
-
-        if arg2 is None and arg1 != "close":
-            await ctx.send("You need to specify a role.")
 
         if arg1 == "start":
             if len(user) > 0:
@@ -64,18 +61,32 @@ class Chatgpt(commands.Cog):
             status=1
             )
 
+        await ctx.send(f"Conversation started with the id {conv_id}.")
+        return
+
+    @commands.command(name="role")
+    async def role(self, ctx: commands.Context, *, arg):
+        conv = self.database.conv_get(
+            user_id=ctx.author.id
+        )
+
+        if len(conv) < 1:
+            await ctx.send("You need to create a conversation first.")
+            return
+
+        conv_id = conv[0][0]
+
         self.database.convmessage_insert(
             user_id=ctx.author.id,
             conv_id=conv_id,
             role="system",
-            message=arg2
+            message=arg
         )
 
-        await ctx.send(f"Conversation started with the id {conv_id}.")
-        return
+        await ctx.send("Role successfully updated.")
 
     @commands.command(name="ask")
-    async def ask(self, ctx: commands.Context, arg1):
+    async def ask(self, ctx: commands.Context, *, arg):
         conv = self.database.conv_get(
             user_id=ctx.author.id
         )
@@ -91,6 +102,10 @@ class Chatgpt(commands.Cog):
             conv_id=conv_id
         )
 
+        if len(conv_messages) < 1:
+            await ctx.send("You need to set up a role first.")
+            return
+
         messages = []
 
         for message in conv_messages:
@@ -98,7 +113,7 @@ class Chatgpt(commands.Cog):
                 {"role": message[3], "content": message[4]}
             )
 
-        messages.append({"role": "user", "content": arg1})
+        messages.append({"role": "user", "content": arg})
 
         response = await self.ai.ChatCompletion.acreate(
             model=self.model,
@@ -109,7 +124,7 @@ class Chatgpt(commands.Cog):
             user_id=ctx.author.id,
             conv_id=conv_id,
             role="user",
-            message=arg1
+            message=arg
         )
 
         content = response["choices"][0]["message"]['content']
