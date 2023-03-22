@@ -136,7 +136,7 @@ class Chatgpt(commands.Cog):
             message=content
         )
 
-        await ctx.send(content)
+        await ctx.reply(content)
 
 
 async def setup(bot):
