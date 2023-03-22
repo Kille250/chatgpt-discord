@@ -1,6 +1,9 @@
 import os
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+
+load_dotenv()
 
 intents = discord.Intents.all()
 
@@ -14,7 +17,8 @@ async def setup(bot):
 
 @bot.event
 async def on_ready():
+
     await setup(bot)
     print(f'We have logged in as {bot.user}')
 
-bot.run('OTI0NzEzMjIyMzE2MTE4MDU3.GSMBKb.78ssvSrfcTr5mlfN4gMJJCBMGdU_Ua3rwMm8tc')
+bot.run(os.getenv("DISCORD_API_KEY"))
