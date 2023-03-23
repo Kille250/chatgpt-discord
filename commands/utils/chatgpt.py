@@ -18,7 +18,6 @@ class Chatgpt(commands.Cog):
         self.model = os.getenv("MODEL")
 
     @commands.command(name="conv")
-    @commands.cooldown(1, 5, commands.BucketType.guild)
     async def conv(self, ctx: commands.Context, arg1):
         user = self.database.conv_get(
             user_id=ctx.author.id
