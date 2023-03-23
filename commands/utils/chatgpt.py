@@ -2,6 +2,7 @@ from discord.ext import commands
 import openai
 import os
 from dotenv import load_dotenv
+from retry import retry
 from db.database import Database
 
 
@@ -16,14 +17,24 @@ class Chatgpt(commands.Cog):
 
         self.ai.api_key = os.getenv("AI_KEY")
         self.model = os.getenv("MODEL")
+        self.max_tokens = os.getenv("MAX_TOKENS")
+
+    @retry(delay=1, backoff=2, max_delay=120, tries=3)
+    async def ai_chat_call_retry(self, messages):
+        
+        response = await self.ai.ChatCompletion.acreate(
+            model=self.model,
+            messages=messages,
+            max_tokens=int(self.max_tokens)
+        )
+
+        return response
 
     @commands.command(name="conv")
     async def conv(self, ctx: commands.Context, arg1):
         user = self.database.conv_get(
             user_id=ctx.author.id
         )
-
-        print(user)
 
         allowed_params = [
             "start",
@@ -114,11 +125,12 @@ class Chatgpt(commands.Cog):
 
         messages.append({"role": "user", "content": arg})
 
-        response = await self.ai.ChatCompletion.acreate(
-            model=self.model,
-            messages=messages,
-            max_tokens=int(os.getenv("MAX_TOKENS"))
-        )
+        try:
+            response = await self.ai_chat_call_retry(
+                messages=messages
+            )
+        except Exception as e:
+            ctx.send(f"A Error Occured: {e}")
 
         self.database.convmessage_insert(
             user_id=ctx.author.id,
