@@ -107,16 +107,25 @@ class Chatgpt(commands.Cog):
 
         conv_id = conv[0][0]
 
-        conv_messages = self.database.convmessage_get(
+        role_message = self.database.convmessage_system_get(
             user_id=ctx.author.id,
             conv_id=conv_id
         )
 
-        if len(conv_messages) < 1:
+        if len(role_message) < 1:
             await ctx.send("You need to set up a role first.")
             return
 
         messages = []
+        messages.append({
+            "role": role_message[0][3],
+            "content": role_message[0][4],
+            })
+
+        conv_messages = self.database.convmessage_get(
+        user_id=ctx.author.id,
+        conv_id=conv_id
+        )
 
         for message in conv_messages:
             messages.append(
@@ -124,6 +133,8 @@ class Chatgpt(commands.Cog):
             )
 
         messages.append({"role": "user", "content": arg})
+
+        print(messages)
 
         try:
             response = await self.ai_chat_call_retry(

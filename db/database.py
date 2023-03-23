@@ -62,9 +62,30 @@ class Database():
 
     @dbconnection(path)
     def convmessage_get(self, user_id, conv_id, cur=None):
-        query = """SELECT * from Convmessage
-                    where user_id = ?
-                    and conv_id = ?"""
+        query = """select * from (
+                    select * from Convmessage
+                    where role != 'system'
+                    and user_id = ?
+                    and conv_id = ?
+                    order by id DESC
+                    limit 5)
+                    order by id asc;
+        """
+
+        cur.execute(query, (user_id, conv_id,))
+        rows = cur.fetchall()
+
+        return rows
+    
+    @dbconnection(path)
+    def convmessage_system_get(self, user_id, conv_id, cur=None):
+        query = """select * from Convmessage
+                    where role = 'system'
+                    and user_id = ?
+                    and conv_id = ?
+                    order by id DESC
+                    limit 1
+        """
 
         cur.execute(query, (user_id, conv_id,))
         rows = cur.fetchall()
