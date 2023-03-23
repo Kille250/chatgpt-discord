@@ -130,7 +130,7 @@ class Chatgpt(commands.Cog):
                 messages=messages
             )
         except Exception as e:
-            ctx.send(f"A Error Occured: {e}")
+            await ctx.send(f"A Error Occured: {e}")
 
         self.database.convmessage_insert(
             user_id=ctx.author.id,
