@@ -118,7 +118,7 @@ class Chatgpt(commands.Cog):
         response = await self.ai.ChatCompletion.acreate(
             model=self.model,
             messages=messages,
-            max_tokens=os.getenv("MAX_TOKENS")
+            max_tokens=int(os.getenv("MAX_TOKENS"))
         )
 
         self.database.convmessage_insert(
