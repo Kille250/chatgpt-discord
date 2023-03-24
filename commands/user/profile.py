@@ -5,6 +5,7 @@ from db.database import Database
 
 class Profile(commands.Cog):
     def __init__(self, bot):
+        self.empty = "No Content available."
         self.bot = bot
         self.db = Database()
 
@@ -12,17 +13,36 @@ class Profile(commands.Cog):
     async def profile(self, ctx: commands.Context):
         title = f"Profile from {ctx.author.name}"
 
-        fields = {
-            "AI-Requests": len(self.db.convmessages_role_get(
+        user_messages =self.db.convmessages_role_get(
                 user_id=ctx.author.id,
                 role="user"
-            )),
-            "Last Answer Recieved": self.db.convmessages_role_get(
+            )
+        
+        if len(user_messages) > 0:
+            user_messages = len(user_messages)
+        else:
+            user_messages = None
+        
+        last_bot_message = self.db.convmessages_role_get(
                 user_id=ctx.author.id,
                 role="assistant",
                 limit=1
-            )[0][4]
-        }
+            )
+        
+        if len(last_bot_message) > 0:
+            last_bot_message = last_bot_message[0][4]
+        else:
+            last_bot_message = None
+
+        fields = {
+            "AI-Requests": user_messages,
+            "Last Answer Received": last_bot_message
+            }
+
+        for key in fields.keys():
+
+            if fields[key] is None:
+                fields[key] = self.empty
 
         # WIP
         embed = Embed(
