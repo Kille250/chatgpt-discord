@@ -61,33 +61,48 @@ class Database():
         return rows
 
     @dbconnection(path)
-    def convmessage_get(self, user_id, conv_id, cur=None):
+    def convmessages_get(self, user_id, conv_id, limit=5, cur=None):
         query = """select * from (
                     select * from Convmessage
                     where role != 'system'
                     and user_id = ?
                     and conv_id = ?
                     order by id DESC
-                    limit 5)
+                    limit ?)
                     order by id asc;
         """
 
-        cur.execute(query, (user_id, conv_id,))
+        cur.execute(query, (user_id, conv_id, limit))
         rows = cur.fetchall()
 
         return rows
     
     @dbconnection(path)
-    def convmessage_system_get(self, user_id, conv_id, cur=None):
+    def convmessages_role_get(self, user_id, role, limit=-1, cur=None):
+        query = """select *
+                    from Convmessage
+                    where user_id = ?
+                    and role = ?
+                    order by id desc
+                    limit ?;
+        """
+
+        cur.execute(query, (user_id, role, limit))
+        rows = cur.fetchall()
+
+        return rows
+    
+    @dbconnection(path)
+    def convmessages_system_get(self, user_id, conv_id, limit=1, cur=None):
         query = """select * from Convmessage
                     where role = 'system'
                     and user_id = ?
                     and conv_id = ?
                     order by id DESC
-                    limit 1
+                    limit ?
         """
 
-        cur.execute(query, (user_id, conv_id,))
+        cur.execute(query, (user_id, conv_id, limit,))
         rows = cur.fetchall()
 
         return rows
@@ -99,5 +114,5 @@ class Database():
                     and status = 1"""
 
         cur.execute(query, (user_id,))
-        
+
         return cur.rowcount

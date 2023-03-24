@@ -107,7 +107,7 @@ class Chatgpt(commands.Cog):
 
         conv_id = conv[0][0]
 
-        role_message = self.database.convmessage_system_get(
+        role_message = self.database.convmessages_system_get(
             user_id=ctx.author.id,
             conv_id=conv_id
         )
@@ -122,9 +122,9 @@ class Chatgpt(commands.Cog):
             "content": role_message[0][4],
             })
 
-        conv_messages = self.database.convmessage_get(
-        user_id=ctx.author.id,
-        conv_id=conv_id
+        conv_messages = self.database.convmessages_get(
+            user_id=ctx.author.id,
+            conv_id=conv_id
         )
 
         for message in conv_messages:
