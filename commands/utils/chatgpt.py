@@ -134,8 +134,6 @@ class Chatgpt(commands.Cog):
 
         messages.append({"role": "user", "content": arg})
 
-        print(messages)
-
         try:
             response = await self.ai_chat_call_retry(
                 messages=messages
