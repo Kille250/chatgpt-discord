@@ -130,12 +130,12 @@ class Chatgpt(commands.Cog):
                 {"role": message[3], "content": message[4]}
             )
 
-        messages.append({"role": "user", "content": arg})
-
         messages.append({
             "role": role_message[0][3],
             "content": role_message[0][4],
             })
+
+        messages.append({"role": "user", "content": arg})
 
         try:
             response = await self.ai_chat_call_retry(
