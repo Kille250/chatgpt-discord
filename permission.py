@@ -10,12 +10,12 @@ def check_whitelist(func):
             user_id=ctx.author.id
         )
         if len(results) < 1:
-            await ctx.send("No Premission.")
+            await ctx.send("No Permission.")
             return
 
         for i in results:
             if i[2] == ctx.invoked_with:
                 return await func(*args, **kwargs)
             
-        await ctx.send("No Premission.")
+        await ctx.send("No Permission.")
     return wrapper
