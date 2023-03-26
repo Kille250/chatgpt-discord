@@ -10,7 +10,6 @@ class Profile(commands.Cog):
         self.db = Database()
 
     @commands.command("profile")
-    @check_whitelist
     async def profile(self, ctx: commands.Context):
         title = f"Profile from {ctx.author.name}"
 
