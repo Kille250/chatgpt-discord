@@ -119,10 +119,6 @@ class Chatgpt(commands.Cog):
             return
 
         messages = []
-        messages.append({
-            "role": role_message[0][3],
-            "content": role_message[0][4],
-            })
 
         conv_messages = self.database.convmessages_get(
             user_id=ctx.author.id,
@@ -135,6 +131,11 @@ class Chatgpt(commands.Cog):
             )
 
         messages.append({"role": "user", "content": arg})
+
+        messages.append({
+            "role": role_message[0][3],
+            "content": role_message[0][4],
+            })
 
         try:
             response = await self.ai_chat_call_retry(
