@@ -165,15 +165,47 @@ class Chatgpt(commands.Cog):
     @commands.command("generate")
     @check_whitelist
     async def generate(self, ctx: commands.Context, *, arg):
-        response = await self.ai.Image.acreate(
-            prompt=arg,
-            n=1,
-            size="1024x1024"
-        )
+        try:
+            response = await self.ai.Image.acreate(
+                prompt=arg,
+                n=1,
+                size="1024x1024"
+            )
+        except self.ai.error.OpenAIError as e:
+            await ctx.send("Error Code: " + str(e.http_status))
+            await ctx.send(e.error)
+
 
         image_url = response['data'][0]['url']
 
         await ctx.send(image_url)
+
+    @commands.command("remix")
+    @check_whitelist
+    async def remix(self, ctx: commands.Context, *, arg):
+        prompt = arg
+
+        try:
+            image = ctx.message.attachments[0]
+            image_data = await image.read()
+            mask = ctx.message.attachments[1]
+            mask_data = await mask.read()
+        except:
+            await ctx.send("You must provide two square PNG files less than 4MB each.")
+
+        try:
+            response = self.ai.Image.create_edit(
+                image_data,
+                mask_data,
+                prompt=prompt,
+                n=1,
+                size="1024x1024"
+            )
+            output = response['data'][0]['url']
+            await ctx.send(output)
+        except self.ai.error.OpenAIError as e:
+            await ctx.send("Error Code: " + str(e.http_status))
+            await ctx.send(e.error)
 
 
 async def setup(bot):
