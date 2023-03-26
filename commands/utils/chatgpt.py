@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from retry import retry
 from db.database import Database
+from permission import check_whitelist
 
 
 class Chatgpt(commands.Cog):
@@ -96,6 +97,7 @@ class Chatgpt(commands.Cog):
         await ctx.send("Role successfully updated.")
 
     @commands.command(name="ask")
+    @check_whitelist
     async def ask(self, ctx: commands.Context, *, arg):
         conv = self.database.conv_get(
             user_id=ctx.author.id
@@ -159,6 +161,19 @@ class Chatgpt(commands.Cog):
         )
 
         await ctx.reply(content)
+    
+    @commands.command("generate")
+    @check_whitelist
+    async def generate(self, ctx: commands.Context, *, arg):
+        response = await self.ai.Image.acreate(
+            prompt=arg,
+            n=1,
+            size="1024x1024"
+        )
+
+        image_url = response['data'][0]['url']
+
+        await ctx.send(image_url)
 
 
 async def setup(bot):

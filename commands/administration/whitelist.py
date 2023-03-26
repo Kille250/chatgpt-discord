@@ -1,5 +1,6 @@
 from discord.ext import commands
 from db.database import Database
+from permission import check_whitelist
 
 class Whitelist(commands.Cog):
     def __init__(self, bot):
@@ -43,6 +44,7 @@ class Whitelist(commands.Cog):
 
     
     @commands.command("whitelist")
+    @check_whitelist
     async def whitelist(self, ctx: commands.Context, arg1, arg2, arg3):
         
         if self.bot_owner != ctx.author.id:
