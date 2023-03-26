@@ -44,7 +44,6 @@ class Whitelist(commands.Cog):
 
     
     @commands.command("whitelist")
-    @check_whitelist
     async def whitelist(self, ctx: commands.Context, arg1, arg2, arg3):
         
         if self.bot_owner != ctx.author.id:
