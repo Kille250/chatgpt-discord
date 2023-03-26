@@ -1,7 +1,7 @@
 from discord import Embed
 from discord.ext import commands
 from db.database import Database
-
+from permission import check_whitelist
 
 class Profile(commands.Cog):
     def __init__(self, bot):
@@ -10,6 +10,7 @@ class Profile(commands.Cog):
         self.db = Database()
 
     @commands.command("profile")
+    @check_whitelist
     async def profile(self, ctx: commands.Context):
         title = f"Profile from {ctx.author.name}"
 

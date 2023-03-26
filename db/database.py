@@ -116,3 +116,40 @@ class Database():
         cur.execute(query, (user_id,))
 
         return cur.rowcount
+    
+    @dbconnection(path)
+    def whitelist_get(self, user_id, cur=None):
+        query = """
+                select * 
+                from Whitelist 
+                where user_id = ?;
+                """
+
+        cur.execute(query, (user_id,))
+
+        rows = cur.fetchall()
+
+        return rows
+    
+    @dbconnection(path)
+    def whitelist_set(self, user_id, command, cur=None):
+        query = """
+                insert into Whitelist (user_id, command) 
+                values (?, ?)
+                """
+
+        cur.execute(query, (user_id, command,))
+
+        return cur.lastrowid
+    
+    @dbconnection(path)
+    def whitelist_remove(self, user_id, command, cur=None):
+        query = """
+                delete from Whitelist
+                where user_id = ?
+                and command = ?
+                """
+
+        cur.execute(query, (user_id, command,))
+
+        return cur.rowcount

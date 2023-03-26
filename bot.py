@@ -44,6 +44,16 @@ def db_setup():
 
     db.create_table(table_name=table_name, tables=table)
 
+    table_name = "Whitelist"
+
+    table = [
+        "id INTEGER PRIMARY KEY AUTOINCREMENT",
+        "user_id INTEGER NOT NULL",
+        "command TEXT NOT NULL",
+    ]
+
+    db.create_table(table_name=table_name, tables=table)
+
 
 @bot.event
 async def on_ready():
