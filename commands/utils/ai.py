@@ -28,7 +28,7 @@ class Chatgpt(commands.Cog):
 
     @retry(delay=1, backoff=2, max_delay=120, tries=3)
     async def ai_chat_call_retry(self, messages):
-        
+
         response = await self.ai.ChatCompletion.acreate(
             model=self.model,
             messages=messages,
@@ -168,10 +168,10 @@ class Chatgpt(commands.Cog):
         )
 
         await ctx.reply(content)
-    
-    @commands.command("generate")
+
+    @commands.command("imagine")
     @check_whitelist
-    async def generate(self, ctx: commands.Context, *, arg):
+    async def imagine(self, ctx: commands.Context, *, arg):
         url = self.evoke_url
         image_url = self.evoke_image_url
         uuid = ""
@@ -208,7 +208,9 @@ class Chatgpt(commands.Cog):
             mask = ctx.message.attachments[1]
             mask_data = await mask.read()
         except Exception:
-            await ctx.send("You must provide two square PNG files less than 4MB each.")
+            await ctx.send(
+                "You must provide two square PNG files less than 4MB each."
+                )
 
         try:
             response = self.ai.Image.create_edit(
