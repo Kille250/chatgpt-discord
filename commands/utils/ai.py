@@ -1,3 +1,4 @@
+import json
 from discord.ext import commands
 import openai
 import os
@@ -19,6 +20,7 @@ class Chatgpt(commands.Cog):
 
         self.evoke_key = os.getenv("EVOKE_KEY")
         self.evoke_url = os.getenv("EVOKE_URL")
+        self.evoke_image_url = os.getenv("EVOKE_IMAGE_URL")
 
         self.ai.api_key = os.getenv("AI_KEY")
         self.model = os.getenv("MODEL")
@@ -171,6 +173,8 @@ class Chatgpt(commands.Cog):
     @check_whitelist
     async def generate(self, ctx: commands.Context, *, arg):
         url = self.evoke_url
+        image_url = self.evoke_image_url
+        uuid = ""
 
         data = {
             "token": self.evoke_key,
@@ -178,9 +182,20 @@ class Chatgpt(commands.Cog):
         }
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=data) as response:
-                response = await response.text
-                await ctx.send(response)
+            async with session.post(url, json=data) as response:
+                result = await response.text()
+                result = json.loads(result)
+
+                if result['statusCode'] == 200:
+                    uuid = result['body']['UUID']
+
+            async with session.post(image_url, json={
+                "token": self.evoke_key,
+                "UUID": uuid
+            }) as response:
+                result = await response.text()
+                result = json.loads(result)
+                await ctx.send(result['body'])
 
     @commands.command("remix")
     @check_whitelist
