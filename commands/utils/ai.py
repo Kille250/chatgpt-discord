@@ -2,6 +2,7 @@ from discord.ext import commands
 import openai
 import os
 from dotenv import load_dotenv
+import aiohttp
 from retry import retry
 from db.database import Database
 from permission import check_whitelist
@@ -15,6 +16,9 @@ class Chatgpt(commands.Cog):
         self.ai = openai
 
         self.database = Database()
+
+        self.evoke_key = os.getenv("EVOKE_KEY")
+        self.evoke_url = os.getenv("EVOKE_URL")
 
         self.ai.api_key = os.getenv("AI_KEY")
         self.model = os.getenv("MODEL")
@@ -166,20 +170,17 @@ class Chatgpt(commands.Cog):
     @commands.command("generate")
     @check_whitelist
     async def generate(self, ctx: commands.Context, *, arg):
-        try:
-            response = await self.ai.Image.acreate(
-                prompt=arg,
-                n=1,
-                size="1024x1024"
-            )
-        except self.ai.error.OpenAIError as e:
-            await ctx.send("Error Code: " + str(e.http_status))
-            await ctx.send(e.error)
+        url = self.evoke_url
 
+        data = {
+            "token": self.evoke_key,
+            "prompt": arg
+        }
 
-        image_url = response['data'][0]['url']
-
-        await ctx.send(image_url)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=data) as response:
+                response = await response.text
+                await ctx.send(response)
 
     @commands.command("remix")
     @check_whitelist
@@ -191,7 +192,7 @@ class Chatgpt(commands.Cog):
             image_data = await image.read()
             mask = ctx.message.attachments[1]
             mask_data = await mask.read()
-        except:
+        except Exception:
             await ctx.send("You must provide two square PNG files less than 4MB each.")
 
         try:
