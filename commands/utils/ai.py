@@ -167,7 +167,6 @@ class Chatgpt(commands.Cog):
 
         await ctx.reply(content)
 
-    # WIP
     @commands.command("imagine")
     @check_whitelist
     async def imagine(self, ctx: commands.Context, *, arg):
