@@ -35,7 +35,6 @@ class Chatgpt(commands.Cog):
 
         return response
 
-
     @commands.command(name="conv")
     async def conv(self, ctx: commands.Context, arg1):
         user = self.database.conv_get(
