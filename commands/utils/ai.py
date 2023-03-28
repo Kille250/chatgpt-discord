@@ -157,10 +157,29 @@ class Chatgpt(commands.Cog):
 
     @commands.command("imagine")
     @check_whitelist
-    async def imagine(self, ctx: commands.Context, *, arg):
-        arguments = {
-            "prompt": arg
+    async def imagine(self, ctx: commands.Context, *, arg: str):
+        split = "--"
+
+        arguments = {}
+        allowed_arguments = {
+            "negative_prompt"
         }
+
+        if split in arg:
+            split_items = arg.split(split)
+            arguments['prompt'] = split_items[0]
+
+            for i in range(1, len(split_items)):
+                keyword_split = split_items[i].split(" ", 1)
+
+                if keyword_split[0] in allowed_arguments:
+                    arguments[keyword_split[0]] = keyword_split[1]
+                else:
+                    await ctx.send(f"Argument {keyword_split[0]} isn't valid.")
+        else:
+            arguments['prompt'] = arg
+
+        await ctx.send("Request successfully send.")
 
         result = self.replicate.run(
             self.replicate_model,
