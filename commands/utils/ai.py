@@ -1,10 +1,9 @@
-import json
 from discord.ext import commands
 import openai
 import os
 from dotenv import load_dotenv
-import aiohttp
 from retry import retry
+import replicate
 from db.database import Database
 from permission import check_whitelist
 
@@ -15,12 +14,11 @@ class Chatgpt(commands.Cog):
 
         self.bot = bot
         self.ai = openai
+        self.replicate = replicate
 
         self.database = Database()
 
-        self.evoke_key = os.getenv("EVOKE_KEY")
-        self.evoke_url = os.getenv("EVOKE_URL")
-        self.evoke_image_url = os.getenv("EVOKE_IMAGE_URL")
+        self.replicate_model = "cjwbw/dreamshaper:ed6d8bee9a278b0d7125872bddfb9dd3fc4c401426ad634d8246a660e387475b"
 
         self.ai.api_key = os.getenv("AI_KEY")
         self.model = os.getenv("MODEL")
@@ -169,33 +167,20 @@ class Chatgpt(commands.Cog):
 
         await ctx.reply(content)
 
+    # WIP
     @commands.command("imagine")
     @check_whitelist
     async def imagine(self, ctx: commands.Context, *, arg):
-        url = self.evoke_url
-        image_url = self.evoke_image_url
-        uuid = ""
-
-        data = {
-            "token": self.evoke_key,
+        arguments = {
             "prompt": arg
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=data) as response:
-                result = await response.text()
-                result = json.loads(result)
+        result = self.replicate.run(
+            self.replicate_model,
+            input=arguments
+        )
 
-                if result['statusCode'] == 200:
-                    uuid = result['body']['UUID']
-
-            async with session.post(image_url, json={
-                "token": self.evoke_key,
-                "UUID": uuid
-            }) as response:
-                result = await response.text()
-                result = json.loads(result)
-                await ctx.send(result['body'])
+        await ctx.send(result[0])
 
     @commands.command("remix")
     @check_whitelist
