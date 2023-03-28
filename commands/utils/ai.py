@@ -176,6 +176,7 @@ class Chatgpt(commands.Cog):
                     arguments[keyword_split[0]] = keyword_split[1]
                 else:
                     await ctx.send(f"Argument {keyword_split[0]} isn't valid.")
+                    return
         else:
             arguments['prompt'] = arg
 
