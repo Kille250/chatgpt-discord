@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from retry import retry
 import replicate
+from asyncio import sleep
 from db.database import Database
 from permission import check_whitelist
 
@@ -14,11 +15,14 @@ class Chatgpt(commands.Cog):
 
         self.bot = bot
         self.ai = openai
-        self.replicate = replicate
 
         self.database = Database()
 
-        self.replicate_model = "cjwbw/dreamshaper:ed6d8bee9a278b0d7125872bddfb9dd3fc4c401426ad634d8246a660e387475b"
+        self.replicate = replicate
+        self.replicate_model = self.replicate.models.get("kille250/neverending-dream")
+        self.replicate_version = self.replicate_model.versions.get(
+            "dec5df1447a240128cd952bdc8c46c10a6521a0c05ecc9a86d7f6b8419f24aeb"
+        )
 
         self.ai.api_key = os.getenv("AI_KEY")
         self.model = os.getenv("MODEL")
@@ -192,14 +196,22 @@ class Chatgpt(commands.Cog):
         else:
             arguments['prompt'] = arg
 
-        await ctx.send("Request successfully send.")
-
-        result = self.replicate.run(
-            self.replicate_model,
+        prediction = self.replicate.predictions.create(
+            version=self.replicate_version,
             input=arguments
         )
 
-        await ctx.send(result[0])
+        message = await ctx.reply("Request successfully send.")
+
+        while prediction.status != "succeeded":
+            await sleep(3)
+            prediction.reload()
+            
+            await message.edit(
+                content=f"Status: {prediction.status}"
+                )
+
+        await ctx.reply(prediction.output[0])
 
     @commands.command("remix")
     @check_whitelist
